@@ -1,14 +1,17 @@
 "use client";
 import React, { useEffect } from "react";
 
-var gameRunning: boolean = false;
+let gameRunning: boolean = false;
 var letterAmount: number = 0;
 var wordsTyped: number = 1;
 var incorrectAmount: number = 0;
 var correctAmount: number = 0;
 var timeStarted: Date;
 var timeFinished: Date;
-var timer: string = sessionStorage.getItem("timer") || "None";
+let timer: string = sessionStorage.getItem("timer") || "None";
+if (timer != "None" && timer != "15" && timer != "30" && timer != "60") {
+  timer = "None";
+}
 let intervalId: number | undefined;
 
 document.addEventListener("keydown", function (event) {
@@ -334,16 +337,27 @@ const generateNewWord = async () => {
     "#tempText"
   ) as HTMLHeadElement | null;
   const difficulty = sessionStorage.getItem("diff") || "medium";
-  var wordAmount: string = sessionStorage.getItem("wordAmount") || "15";
+  let wordAmount: any = sessionStorage.getItem("wordAmount") || "15";
   let lengths;
+
+  if (
+    parseInt(wordAmount) < 15 ||
+    parseInt(wordAmount) > 60 ||
+    isNaN(parseInt(wordAmount))
+  ) {
+    wordAmount = 15;
+  }
 
   if (difficulty) {
     if (difficulty === "easy") {
-      lengths = generateRandomIntArray(parseInt(wordAmount), 2, 4);
+      lengths = generateRandomIntArray(parseInt(wordAmount), 3, 5);
     } else if (difficulty === "medium") {
-      lengths = generateRandomIntArray(parseInt(wordAmount), 4, 6);
+      lengths = generateRandomIntArray(parseInt(wordAmount), 5, 7);
+    } else if (difficulty === "hard") {
+      lengths = generateRandomIntArray(parseInt(wordAmount), 7, 9);
     } else {
-      lengths = generateRandomIntArray(parseInt(wordAmount), 8, 10);
+      lengths = generateRandomIntArray(parseInt(wordAmount), 3, 5);
+      sessionStorage.setItem("diff", "easy");
     }
   } else {
     alert("Problem adding the difficulty Level");
@@ -357,13 +371,33 @@ const generateNewWord = async () => {
   if (wordsElement) {
     let wordsArray: string[] = [];
     for await (const wordLength of lengths) {
-      const response = await fetch(
-        `https://random-word-api.vercel.app/api?words=1&length=${wordLength}`
-      );
-      const data = await response.json();
-      const word = data[0];
-      // sessionStorage.setItem("totalLetters", `${letterAmount}`);
-      wordsArray.push(word);
+      try {
+        const response = await fetch(
+          `https://random-word-api.vercel.app/api?words=1&length=${wordLength}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch words");
+        }
+
+        const data = await response.json();
+        const word = data[0];
+        wordsArray.push(word);
+      } catch (error) {
+        console.error(
+          "Fetch error:",
+          error,
+          wordLength,
+          difficulty,
+          wordAmount,
+          lengths
+        );
+        alert("Failed fetching words. \nClick OK to Try Again.");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        break;
+      }
     }
 
     for (const word of wordsArray) {
@@ -398,11 +432,11 @@ const generateNewWord = async () => {
     } else {
       console.error("No word div element was found to add active class.");
     }
-
-    gameRunning = true;
   } else {
     console.error("Words Element Not Found");
   }
+
+  gameRunning = true;
 };
 
 setTimeout(() => {
@@ -425,7 +459,10 @@ const Words = () => {
         </h1>
       </div>
       <div className="countdownDiv z-50">
-        <h1 id="timerCountdown" className="text-3xl transition-all duration-300">
+        <h1
+          id="timerCountdown"
+          className="text-3xl transition-all duration-300"
+        >
           {timer != "None" ? `0/${timer}` : "No timer"}
         </h1>
       </div>

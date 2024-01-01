@@ -3,6 +3,7 @@ import React, {
   ButtonHTMLAttributes,
   ChangeEvent,
   MouseEvent,
+  useEffect,
   useState,
 } from "react";
 
@@ -71,11 +72,49 @@ const Countdown = () => {
     return index;
   };
 
+  const defaultClicked = () => {
+    const buttonList = document.querySelector(
+      "#buttonList"
+    ) as HTMLDivElement | null;
+    if (!buttonList) return window.location.reload();
+
+    let timer = sessionStorage.getItem("timer") || "None";
+
+    if (timer != "None" && timer != "15" && timer != "30" && timer != "60") {
+      timer = "None";
+      sessionStorage.setItem("timer", `None`);
+    }
+
+    switch (timer) {
+      case "None":
+        buttonList.children[0].classList.add("clicked");
+        break;
+      case "15":
+        buttonList.children[1].classList.add("clicked");
+        break;
+      case "30":
+        buttonList.children[2].classList.add("clicked");
+        break;
+      case "60":
+        buttonList.children[3].classList.add("clicked");
+        break;
+      default:
+        buttonList.children[0].classList.add("clicked");
+        sessionStorage.setItem("timer", `None`);
+        break;
+    }
+    console.log(timer);
+  };
+
+  useEffect(() => {
+    defaultClicked();
+  });
+
   return (
     <div id="buttonList" className="flex gap-4 items-center justify-center">
       <button
         onClick={handleBtnClick}
-        className="p-2 shadow-lg clicked bg-slate-400 px-4 rounded-md hover:shadow-none transition-all hover:bg-slate-600 hover:text-white duration-300"
+        className="p-2 shadow-lg bg-slate-400 px-4 rounded-md hover:shadow-none transition-all hover:bg-slate-600 hover:text-white duration-300"
       >
         No Timer
       </button>
