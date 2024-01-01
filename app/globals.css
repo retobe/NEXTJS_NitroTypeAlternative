@@ -3,22 +3,28 @@
 @tailwind utilities;
 
 .correct {
-  color: #22C55B;
+  color: #22c55b;
 }
 
-.incorrect {  
-  color: #E24144;
+.incorrect {
+  color: #e24144;
 }
 
 .cursor::before {
   content: "|";
   color: yellow;
-  transition: .3s;
+  transition: 0.3s;
 }
 
 .word > span {
   font-size: larger;
-  transition: .3s;
+  transition: 0.3s;
+}
+
+.clicked {
+  background-color: #e24144 !important;
+  transition: 0.3s;
+  cursor: default;
 }
 
 /* .word > span:empty {

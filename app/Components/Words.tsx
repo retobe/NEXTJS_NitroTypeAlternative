@@ -5,8 +5,11 @@ var gameRunning: boolean = false;
 var letterAmount: number = 0;
 var wordsTyped: number = 1;
 var incorrectAmount: number = 0;
-var timeStarted: Date = new Date();
-var timeFinished: Date = new Date();
+var correctAmount: number = 0;
+var timeStarted: Date;
+var timeFinished: Date;
+var timer: string = sessionStorage.getItem("timer") || "None";
+let intervalId: number | undefined;
 
 document.addEventListener("keydown", function (event) {
   if (!gameRunning) return;
@@ -57,6 +60,7 @@ document.addEventListener("keydown", function (event) {
 
         if (key === letter.textContent) {
           correctLetter = key != "" ? key : "SpaceBar";
+          correctAmount += letter.textContent === "" ? 0 : 1;
           letter.classList.add("correct");
           if (correctSpan && incorrectSpan) {
             incorrectSpan.innerHTML = "";
@@ -66,7 +70,7 @@ document.addEventListener("keydown", function (event) {
           }
         } else {
           letter.classList.add("incorrect");
-          incorrectAmount += 1;
+          incorrectAmount += letter.textContent === "" ? 0 : 1;
           if (incorrectSpan && correctSpan) {
             correctSpan.innerHTML = "";
             incorrectSpan.innerHTML = `Incorrect! (${
@@ -189,6 +193,7 @@ document.addEventListener("keydown", function (event) {
             if (addedClass === true) break; // If the class has already been added then break out of the function
 
             if (key === letter.textContent) {
+              correctAmount += letter.textContent === "" ? 0 : 1;
               letter.classList.add("correct");
               if (correctSpan && incorrectSpan) {
                 incorrectSpan.innerHTML = "";
@@ -197,6 +202,7 @@ document.addEventListener("keydown", function (event) {
                 })`;
               }
             } else {
+              incorrectAmount += letter.textContent === "" ? 0 : 1;
               letter.classList.add("incorrect");
               if (incorrectSpan && correctSpan) {
                 correctSpan.innerHTML = "";
@@ -217,6 +223,7 @@ document.addEventListener("keydown", function (event) {
 
       if (!timeStarted) {
         timeStarted = new Date();
+        intervalId = setInterval(startCountDown, 1000) as any;
       }
     } else {
       timeFinished = new Date();
@@ -225,6 +232,33 @@ document.addEventListener("keydown", function (event) {
     }
   }
 });
+
+const startCountDown = () => {
+  console.log("RAN TIMER before conditions");
+  if (!gameRunning) {
+    if (intervalId) {
+      clearInterval(intervalId); // Stop the interval if gameRunning is false
+    }
+    return;
+  }
+  if (!timer || timer === "None") return;
+  if (!timeStarted) return;
+  const currentSeconds = (Date.now() - timeStarted.getTime()) / 1000;
+  console.log("RAN TIMER");
+  if (currentSeconds >= parseInt(timer)) {
+    timeFinished = new Date();
+    gameRunning = false;
+    alert("Time's Up!");
+    gameResult();
+  } else {
+    const countdownElement = document.querySelector(
+      "#timerCountdown"
+    ) as HTMLHeadingElement | null;
+    if (countdownElement) {
+      countdownElement.innerHTML = `${Math.round(currentSeconds)}/${timer}`;
+    }
+  }
+};
 
 const getChildernIndex = (element: any) => {
   const parentElement = element.parentElement;
@@ -251,12 +285,11 @@ const gameResult = () => {
   /**
    * Timestamps / WPMs
    */
-
   const timeTook: number = timeFinished.getTime() - timeStarted.getTime();
   const minutes: number = timeTook / 60000;
   const roundedTimeTook: number = Math.round(minutes * 100) / 100;
   const wpmPrecise = wordsTyped / roundedTimeTook;
-  const wpmRounded = Math.round(wordsTyped / minutes).toPrecision(2);
+  const wpmRounded = Math.round(wordsTyped / minutes);
   sessionStorage.setItem("wordsTyped", `${wordsTyped}`);
   sessionStorage.setItem("roundedWPM", `${wpmRounded}`);
   sessionStorage.setItem("preciseWPM", `${wpmPrecise.toPrecision(4)}`);
@@ -281,23 +314,15 @@ const gameResult = () => {
    */
   sessionStorage.setItem(
     "accuracy",
-    `${(
-      (Math.abs(incorrectAmount - letterAmount) / letterAmount) *
-      100
-    ).toPrecision(2)}`
+    `${Math.round((correctAmount / letterAmount) * 100)}`
   );
   sessionStorage.setItem(
     "preciseAccuracy",
-    `${(
-      Math.abs((incorrectAmount - letterAmount) / letterAmount) * 100
-    ).toPrecision(4)}`
+    `${((correctAmount / letterAmount) * 100).toPrecision(4)}`
   );
   sessionStorage.setItem("letterAmount", `${letterAmount}`);
   sessionStorage.setItem("incorrectAmount", `${incorrectAmount}`);
-  sessionStorage.setItem(
-    "correctAmount",
-    `${Math.abs(incorrectAmount - letterAmount)}`
-  );
+  sessionStorage.setItem("correctAmount", `${correctAmount}`);
   window.location.href = "/result";
 };
 
@@ -340,7 +365,7 @@ const generateNewWord = async () => {
       // sessionStorage.setItem("totalLetters", `${letterAmount}`);
       wordsArray.push(word);
     }
-    
+
     for (const word of wordsArray) {
       const wordElement = document.createElement("div");
       wordElement.classList.add("word");
@@ -349,7 +374,7 @@ const generateNewWord = async () => {
         const letter = word[j] || "";
         const letterElement = document.createElement("span");
         letterElement.innerHTML = `${letter}`;
-        letterAmount += 1;
+        letterAmount += letter === "" ? 0 : 1;
 
         wordElement.appendChild(letterElement);
       }
@@ -391,14 +416,17 @@ function generateRandomIntArray(length: number, min: number, max: number) {
   );
 }
 
-// ERROR: The divs aren't being added correctly, not even gpt could help
-
 const Words = () => {
   return (
     <div className="p-2">
       <div id="words" className="words flex gap-2 flex-wrap w-full">
         <h1 id="tempText" className="text-white">
           Start typing as soon the words appear here :)
+        </h1>
+      </div>
+      <div className="countdownDiv z-50">
+        <h1 id="timerCountdown" className="text-3xl transition-all duration-300">
+          {timer != "None" ? `0/${timer}` : "No timer"}
         </h1>
       </div>
     </div>

@@ -1,6 +1,9 @@
 import StartBtn from "./Components/StartBtn";
 import SetDiff from "./Components/SetDiff";
 import WordCount from "./Components/WordCount";
+import Countdown from "./Components/Countdown";
+
+
 export default function Home() {
   return (
     <div className="p-3">
@@ -11,14 +14,14 @@ export default function Home() {
         <p className="text-lg">
           This is an alternative Monkey/Nitro Type website thing In order to
           begin typing click the start button at the bottom to get started.
-          You'll have 30 seconds to display your fastest typing skills and we'll
-          record it. You also can range your difficulty level depending on the
-          length of each of the word.
+          You can set a timer (optional) to test your limits, you also can range your difficulty level depending on the
+          length of each of the word and the amount of words
         </p>
         <br />
         <StartBtn />
         <br />
         <br />
+        <Countdown/>
         <SetDiff />
         <WordCount/>
       </div>

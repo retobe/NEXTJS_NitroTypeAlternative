@@ -17,16 +17,16 @@ const setStatistics = (): void => {
   const wordsTyped = sessionStorage.getItem("wordsTyped");
 
   // Parse values as needed
-  const parsedPreciseWPM = parseFloat(preciseWPM || "0");
-  const parsedWpmRounded = parseFloat(wpmRounded || "0");
-  const parsedPreciseAccuracy = parseFloat(preciseAccuracy || "0");
-  const parsedAccuracy = parseFloat(accuracy || "0");
-  const parsedCorrectAmount = parseInt(correctAmount || "0", 10);
-  const parsedIncorrectAmount = parseInt(incorrectAmount || "0", 10);
-  const parsedLetterAmount = parseInt(letterAmount || "0", 10);
-  const parsedTimeTook = timeTook || "";
-  const parsedTimeStarted = timeStarted || ""; // Assuming this is a string
-  const parsedTimeFinished = timeFinished || ""; // Assuming this is a string
+  const parsedPreciseWPM = preciseWPM || "Error 404";
+  const parsedWpmRounded = wpmRounded || "Error 404";
+  const parsedPreciseAccuracy = preciseAccuracy || "Error 404";
+  const parsedAccuracy = accuracy || "Error 404";
+  const parsedCorrectAmount = correctAmount || "Error 404";
+  const parsedIncorrectAmount = incorrectAmount || "Error 404";
+  const parsedLetterAmount = letterAmount || "Error 404";
+  const parsedTimeTook = timeTook || "Error 404";
+  const parsedTimeStarted = timeStarted || "Error 404"; // Assuming this is a string
+  const parsedTimeFinished = timeFinished || "Error 404"; // Assuming this is a string
 
   /**
    * Main Statistics Elements
